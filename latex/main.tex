@@ -1,0 +1,38 @@
+\documentclass[12pt]{article}
+
+\include{config/config}
+\include{report_details}
+\input{config/titlepage_config}
+
+\begin{document}
+
+% % % %  You should not need to edit this page??    % % % %
+
+
+% % % % % % % % 	Title/Abstract     % % % % % % % % % %
+\include{config/titlepage}
+\begin{abstract}
+\input{abstract}
+\end{abstract}
+\section{Introduction}
+\input{intro}
+
+% % % % % % % % 	Body Sections   % % % % % % % % % %
+\section{Theoretical Background}
+\input{theory}
+\newpage
+\section{Experimental Background \& Procedure}
+\input{procedure}
+\newpage
+\section{Analysis}
+\input{analysis}
+\section{Conclusion}
+\input{conclusion}
+
+% % % % % % % % % References % % % % % % % % % % 
+\newpage
+\nocite{*}
+\bibliographystyle{siam}
+\bibliography{references}
+
+\end{document}
