@@ -11,6 +11,9 @@ import shutil
 import scipy.signal as sc
 import scipy.optimize as opt
 import scipy.interpolate as si
+from scipy.optimize import leastsq
+from scipy.stats import norm
+from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import os
@@ -90,13 +93,16 @@ def boot_plots(x, y_s, labels, line_width = None, x_range = None, y_range = None
     plt.grid()
     return axes
 
+def gaus(x,a,x0,sigma):
+    return a*np.exp(-(x-x0)**2/(2*sigma**2))
+
 if __name__ == '__main__':
     summing = False
-    differentiate = True
+    differentiate = False
     intergrate = False
     exponential = False
     HO = False
-    DHO = False
+    DHO = True
 
     scope_number = 0
     filename = "scope_" + str(scope_number) +".csv"
@@ -191,9 +197,11 @@ if __name__ == '__main__':
             R_pot = cof[scope_number-26]*10**3
             C = C_2
 
-            Beta = (R_pot / (R_pot + Rf))
+            #Beta = (R_pot / (R_pot + Rf))
 
+            Beta = R_pot/R_0
             alpha = (Beta/((Rf+R_pot)*C))
+
             time, v_1, clock, v_0 = findDataSum("scope_%s.csv" % scope_number)
 
             V = [-V_0*np.exp(-alpha*(x + abs(np.min(time)))) for x in time]
@@ -205,11 +213,13 @@ if __name__ == '__main__':
             plt.savefig(str(save_dir.joinpath('scope_%sraw.png' % scope_number)))
             plt.close()
 
-            boot_plots(time, [v_1, derV], ['v_1', 'Calculated'], x_range=[-.5, -.4], y_range=[-2.8, 0])
+            boot_plots(time, [v_1, derV], ['v_1', 'Calculated'], y_range=[-2.8, 0])
+            #x_range=[-.5, -.4]
             plt.savefig(str(save_dir.joinpath('scope_%s_calc.png' % scope_number)))
             plt.close()
 
-            boot_plots(time, [v_1, V], ['v_1', 'Calculated_Voltage'], x_range=[-.5, -.4], y_range=[-2.8, 0])
+            #x_range=[-.5, -.4]
+            boot_plots(time, [v_1, V], ['v_1', 'Calculated_Voltage'], y_range=[-2.8, 0])
             plt.savefig(str(save_dir.joinpath('scope_%s_calc.png' % scope_number)))
             plt.close()
     
@@ -242,4 +252,46 @@ if __name__ == '__main__':
             boot_plots(time, [a, b, c, d], ['calc_a', 'calc_b', 'calc_c', 'calc_d'], x_range=[-4, -2])
             plt.savefig(str(save_dir.joinpath('scope_%scalc.png' % scope_number)))
             plt.close()
+    if DHO:
+        save_dir = graphs_dir.joinpath('DHO')
+        shutil.rmtree(save_dir, ignore_errors=True)  # Avoiding errors if folder already is gone
+        save_dir.mkdir(parents=True)
+        freq = [4.9, 10, 12, 14, 16, 18, 20, 25, 50]
+        amplitude_list = []
+        for scope_number in range(38, 47):
+            time, v_1, v_2, v_3, v_4 = findDataDamped("scope_%s.csv" % scope_number)
+
+            data = v_2[400:600]
+            data_mid, data_max, data_min = np.median(data), np.max(np.sort(data)[:len(v_2)-20]), np.min(np.sort(data)[20:])
+            amplitude = ( np.abs(data_mid - data_max) + np.abs(data_mid - data_min) )/2  # sketchy way to get amplitude without fitting data
+            amplitude_list.append(amplitude)
+
+            boot_plots(time, [v_1, v_2, v_3, v_4], ['a', 'b', 'c', 'd'])
+            plt.savefig(str(save_dir.joinpath('scope_%sraw.png' % scope_number)))
+            plt.close()
+
+            boot_plots(time, [v_2], ['b'], colours=['blue'])
+            plt.savefig(str(save_dir.joinpath('scope_%sv_2.png' % scope_number)))
+            plt.close()
+
+        plt.scatter(freq, amplitude_list)
+        y = np.array(amplitude_list)
+        x = np.array(freq)
+        n = len(x)  # the number of data
+        mean = sum(x * y) / n  # note this correction
+        sigma = sum(y * (x - mean) ** 2) / n  # note this correction
+        popt, pcov = curve_fit(gaus, x, y, p0=[1, mean, sigma])
+
+        FWHM = 2.355 * np.abs(popt[2])
+
+        plt.plot(x, y, 'b+:', label='data')
+        x_fill = np.linspace(0, 50, 100)
+        #plt.plot(x, gaus(x_fill, *popt), 'ro:', label='fit')
+        plt.plot(x_fill, gaus(x_fill, *popt), color='red', label='fit')
+        plt.legend()
+        plt.title('Peak = %6.2f FWHM = %6.2f' % (popt[1], FWHM))
+        plt.xlabel('Frequency (Hz)')
+        plt.ylabel('Amplitude (V)')
+        plt.savefig(str(save_dir.joinpath('q_value.png')))
+
 
