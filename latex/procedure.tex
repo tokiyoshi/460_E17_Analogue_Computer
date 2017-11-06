@@ -1,10 +1,48 @@
 \subsection{Apparatus}
-The experiment is based around using some equipment, such as...
+In this experiment we  used a rack containing a number of op amp’s as the main equipment. It was here that we built all of our circuits. As well to build the circuits we had an assortment of wires, plugins and resistors and capacitors to build the circuits, and two function generators where provided. We also had an oscilloscope where we read all of our values.
 
-\subsubsection{equpiment1}
+\subsubsection{Op-Amp Rack}
 \label{sec:e1}
-We use stuff
+This was a rack that we built all the circuits on. It was a board that contained several different op-amps as well as connection points that allowed for us to build all the circuits that we needed.
+\subsubsection{Function Generator}
+\label{sec:e1}
+This was what we used to produce the different sine, square and triangular waves that we used throughout the experiment.
+\subsubsection{Oscilloscope}
+\label{sec:e1}
+This was what we used to read the results of the voltages that we were meant to measure. 
+\subsubsection{Wires/Capacitors/Resistors}
+\label{sec:e1}
+We had an assortment of wires, capacitors, resistors that we used to build the circuit. The resistors had to be around
+$100 k\Omega$ and the capacitors had to be around $0.1\mu F$. The values that were measure are listed in Table \ref{tab:components}
 
 \subsection{Experimental Procedure}
 
-Then we actually run the experiment
+For this experiment we had to build six different op-amp circuits and test to make sure that they work as expected. The first step was to collect the resistors and the capacitors that we needed to build the circuits and measure there values. Once we had obtained and recorded the values the next step was to build the first circuit, this being the Summing. \newline
+
+All analysis is done through custom python software which can be found at:\\ \url{https://github.com/tokiyoshi/460_E17_Analogue_Computer}
+\subsubsection{Summing}
+For this we needed to record two input voltages and an out put voltage that should be the sum of the two input voltages. After several trials with different waves (sine, triangular, square) and some in and out of phase. The results were saved for analysis
+\subsubsection{Differentiating}
+The next circuit being the differentiating circuit. In this circuit we had one input voltage and on output voltage. The output voltage being the differentiated voltage for the input. We applied a sine, triangular and square wave to this circuit and verified it worked.The results were saved for analysis
+\subsubsection{Integration}
+Then we built the integration circuit. Again we had one input and one output and for this circuit we verified that the circuit was indeed integrating the input voltage. We first had to apply a square wave, then a sine and a triangular wave. The next thing for this was that we had to apply a DC voltage of +3V to the input to observe the voltage ramp. For this we had to add a clock to the circuit in place of the switch. The clock was a square wave going between +6V and 0V. This clock was used for the last three parts of the lab.The results were saved for analysis
+\subsubsection{Exponential Functions}
+Then we had to built this circuit; for this part we had to measure two voltages based on the given circuit and from there we had to compare them with the solution to the equation that we were given. Again we had several trials of this and the results were saved to be analyzed. 
+\subsubsection{Damped Harmonic Motion}
+In this section we built the circuit provided and from that we measured the voltage at four points, to verify them against the equations that were given. We did several trials for this section and the results were saved for analysis.
+\subsubsection{Forced Damped Harmonic Motion}
+For this part we had to slightly modify the previous circuit and from that measure the amplitude in the steady state. The results were saved for analysis
+
+\subsubsection{Components}
+
+Here we will present the table of all passive electrical components used throughout this lab.
+
+\begin{table}[h]
+
+  \footnotesize{
+        \input{tables/components}
+        
+    }
+\caption{The values our components are stated here.}%
+\label{tab:components}
+\end{table}
