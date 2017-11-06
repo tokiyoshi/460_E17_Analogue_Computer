@@ -97,12 +97,12 @@ def gaus(x,a,x0,sigma):
     return a*np.exp(-(x-x0)**2/(2*sigma**2))
 
 if __name__ == '__main__':
-    summing = False
-    differentiate = False
-    intergrate = False
-    exponential = False
-    HO = False
-    DHO = True
+    summing = False  #DONE
+    differentiate = False  #DONE
+    intergrate = False  #DONE
+    exponential = False  #DONE
+    HO = True
+    DHO = False  #DONE
 
     scope_number = 0
     filename = "scope_" + str(scope_number) +".csv"
@@ -186,12 +186,12 @@ if __name__ == '__main__':
     
     # Exponetial
     if exponential:
-        save_dir = graphs_dir.joinpath('Exponential')
+        save_dir = graphs_dir.joinpath('Exponential_alphared')
         shutil.rmtree(save_dir, ignore_errors=True)  # Avoiding errors if folder already is gone
         save_dir.mkdir(parents=True)
 
         for scope_number in range(26, 32):
-            cof = [0.0, 2.0, 4.0, 6.0, 8.0, 9.91]
+            cof = [0.0, 2.0, 4.0, 6.0, 8.0, 9.9101]
             Rf = R_3
             R_0 = 9.91*10**3
             R_pot = cof[scope_number-26]*10**3
@@ -199,27 +199,28 @@ if __name__ == '__main__':
 
             #Beta = (R_pot / (R_pot + Rf))
 
-            Beta = R_pot/R_0
-            alpha = (Beta/((Rf+R_pot)*C))
+            Beta = 1 - (R_pot/R_0)
+            #alpha = (Beta/((Rf+R_pot)*C))
+            alpha = ((Beta)/ ((Rf + R_pot) * C))
 
             time, v_1, clock, v_0 = findDataSum("scope_%s.csv" % scope_number)
 
-            V = [-V_0*np.exp(-alpha*(x + abs(np.min(time)))) for x in time]
+            V = np.array([-Beta * V_0*np.exp(-alpha*(x + abs(np.min(time)))) - 0.35 for x in time])
             V_n = [x*Rf*C for x in v_0]
 
-            derV = np.append(np.diff(V)/np.diff(time), 0)
+            derV = np.append(np.diff(-V)/np.diff(time), 0)
 
             boot_plots(time, [v_1, v_0, clock], ['v_1', 'v_0', 'Clock'])
             plt.savefig(str(save_dir.joinpath('scope_%sraw.png' % scope_number)))
             plt.close()
 
-            boot_plots(time, [v_1, derV], ['v_1', 'Calculated'], y_range=[-2.8, 0])
+            boot_plots(time, [v_0, derV], ['v_0', 'Derivitive Calculated'], y_range=[-2.8, 0], x_range=[-.505, -0.34])
             #x_range=[-.5, -.4]
-            plt.savefig(str(save_dir.joinpath('scope_%s_calc.png' % scope_number)))
+            plt.savefig(str(save_dir.joinpath('scope_%s_calc_der.png' % scope_number)))
             plt.close()
 
             #x_range=[-.5, -.4]
-            boot_plots(time, [v_1, V], ['v_1', 'Calculated_Voltage'], y_range=[-2.8, 0])
+            boot_plots(time, [v_1, V], ['v_1', 'Calculated_Voltage'], y_range=[-2.8, 0], x_range=[-.505, -0.34])
             plt.savefig(str(save_dir.joinpath('scope_%s_calc.png' % scope_number)))
             plt.close()
     
@@ -229,16 +230,18 @@ if __name__ == '__main__':
         shutil.rmtree(save_dir, ignore_errors=True)  # Avoiding errors if folder already is gone
         save_dir.mkdir(parents=True)
 
-        for scope_number in range(36, 37):
+        cof = [0.0, 9.9101, 3.37]
+
+        for scope_number in range(35, 38):
             time, v_1, v_2, v_3, v_4 = findDataDamped("scope_%s.csv" % scope_number)
             Rf = R_3
             C = C_2
-            R = 2.00 *10**3 # INCORRECT CHANGE
+            R_pot = cof[scope_number - 35] * 10 ** 3
 
-            alpha = (R/(R_0*Rf*C))
+            alpha = (R_pot/(R_0*Rf*C))
             #r = 0.5*(-alpha+ np.sqrt(alpha*alpha - 4*(1.0/(R3*C)**2)))
 
-            boot_plots(time, [v_1, v_2, v_3, v_4], ['a', 'b', 'c', 'd'], x_range=[-4,-2])
+            boot_plots(time, [v_1, v_2, v_3, v_4], ['a', 'b', 'c', 'd'])
             plt.savefig(str(save_dir.joinpath('scope_%sraw.png' % scope_number)))
             plt.close()
 
@@ -246,14 +249,14 @@ if __name__ == '__main__':
             derV = np.diff(V)/np.diff(time)
             a = np.append(np.diff(derV)/np.diff(time[1:]), [0, 0])
             b = np.append([-(x)/(Rf*C) for x in derV], 0)
-            c = [x/(R*C)**2 for x in V]
-            d = [-x/(R*C)**2 for x in V]
+            c = [x/(Rf*C)**2 for x in V]
+            d = [-x/(Rf*C)**2 for x in V]
 
-            boot_plots(time, [a, b, c, d], ['calc_a', 'calc_b', 'calc_c', 'calc_d'], x_range=[-4, -2])
+            boot_plots(time, [a, b, c, d], ['calc_a', 'calc_b', 'calc_c', 'calc_d'])
             plt.savefig(str(save_dir.joinpath('scope_%scalc.png' % scope_number)))
             plt.close()
     if DHO:
-        save_dir = graphs_dir.joinpath('DHO')
+        save_dir = graphs_dir.joinpath('FDHO')
         shutil.rmtree(save_dir, ignore_errors=True)  # Avoiding errors if folder already is gone
         save_dir.mkdir(parents=True)
         freq = [4.9, 10, 12, 14, 16, 18, 20, 25, 50]
@@ -270,7 +273,7 @@ if __name__ == '__main__':
             plt.savefig(str(save_dir.joinpath('scope_%sraw.png' % scope_number)))
             plt.close()
 
-            boot_plots(time, [v_2], ['b'], colours=['blue'])
+            boot_plots(time, [v_2], ['b'], colours=['blue'], y_range=[-1.5, 1.5])
             plt.savefig(str(save_dir.joinpath('scope_%sv_2.png' % scope_number)))
             plt.close()
 
@@ -293,5 +296,7 @@ if __name__ == '__main__':
         plt.xlabel('Frequency (Hz)')
         plt.ylabel('Amplitude (V)')
         plt.savefig(str(save_dir.joinpath('q_value.png')))
-
+        Beta = (2.47 * 10 ** 3 / R_0)
+        freq = 1/Beta
+        print()
 
